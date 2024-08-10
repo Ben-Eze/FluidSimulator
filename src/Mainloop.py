@@ -46,8 +46,11 @@ class Mainloop:
         self.gui(events)
 
         for event in events:
+            # print(event)
             if event.type == pg.QUIT:
                 return 1
+            elif event.type == pg.WINDOWRESIZED:
+                self.display.update_transformation(event)
 
     def __call__(self):
         while True:

@@ -42,26 +42,24 @@ class GUI:
         self.mouse = Mouse()
         self.solver = solver
         self.fluid = solver.fluid
+        self.display = solver.display
     
     def __call__(self, events):
         self.mouse.init(events)
         self.fluid_interaction()
 
     def fluid_interaction(self):
-    
-        # g.d[g.array_centre[1], g.array_centre[0]] += 500
-
         if self.mouse.state == 2:
             self.mouse.pos_prev = self.mouse.pos.copy()
 
         if self.mouse.press:
             for mouse_pos in self.mouse.pos_stack:
-                # mouse_index = (mouse_pos[::-1]/g.sf).astype(int)
-                mouse_index = (mouse_pos[::-1]).astype(int)
+                mouse_index = (
+                    (mouse_pos - self.display.blit_offset)/self.display.sf
+                )[::-1].astype(int)
                 
                 if not self.fluid.walls[mouse_index[0], mouse_index[1]]:
                     velocity = (self.mouse.pos - self.mouse.pos_prev)
-                    # print(mouse_index)
                     self.fluid.d[mouse_index[0], mouse_index[1]] += 1500/len(self.mouse.pos_stack)
                     self.fluid.u[mouse_index[0], mouse_index[1]] = velocity[0]
                     self.fluid.v[mouse_index[0], mouse_index[1]] = velocity[1]

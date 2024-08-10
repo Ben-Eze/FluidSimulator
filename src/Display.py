@@ -46,14 +46,20 @@ class Display:
         max_h = config["display"]["max_height"]
         self.dims = np.array([max_w, max_h])    # make more advanced
 
-        self.window = pg.display.set_mode(self.dims)
+        self.window = pg.display.set_mode(self.dims, flags=pg.RESIZABLE)
         # particle_surf = pg.Surface(self.dims, pg.SRCALPHA, 32)    # implement later
 
         self.Nx = int(config["domain"]["width"] / config["domain"]["base_size"])
         self.Ny = int(config["domain"]["height"] / config["domain"]["base_size"])
-        self.pxarray = np.zeros((self.Ny, self.Nx, 3))
+        self.pxarray = np.zeros((self.Ny, self.Nx, 3), dtype=float)
+        
+        self.sf = None
+        self.blit_offset = None
+        self.domain_dims = None
+        self.update_transformation()
 
         self.background_colour = (0, 0, 0)
+        self.fluid_colour = (0, 0, 20)
 
         self.fluid = solver.fluid
 
@@ -63,18 +69,41 @@ class Display:
         self.blit_pxarray()
         pg.display.update()
     
+    def update_transformation(self, event=None):
+        if event is not None:
+            self.dims = np.array([event.__dict__["x"], event.__dict__["y"]])
+
+        AR_px = self.pxarray.shape[1] / self.pxarray.shape[0]
+        AR_wind = self.dims[0] / self.dims[1]
+
+        self.sf = self.dims[0] / self.pxarray.shape[1] if AR_px > AR_wind \
+             else self.dims[1] / self.pxarray.shape[0]
+        
+        self.domain_dims = np.array(self.pxarray.shape[1::-1])*self.sf
+        
+        self.blit_offset = (self.dims - self.domain_dims) / 2
+
+    
     def update_pxarray(self):
         # in reality will be replaced with individual functions
-        self.pxarray[..., 0] = self.pxarray[..., 1] = self.pxarray[..., 2] = 255 * np.clip(self.fluid.d, 0, 1)
+        self.pxarray[..., 0] = self.fluid_colour[0]
+        self.pxarray[..., 1] = self.fluid_colour[1]
+        self.pxarray[..., 2] = self.fluid_colour[2]
+
+        self.pxarray[..., 0] += 255 * self.fluid.d
+        self.pxarray[..., 1] += 255 * self.fluid.d
+        self.pxarray[..., 2] += 255 * self.fluid.d
+
+        self.pxarray = np.clip(self.pxarray, 0, 255)
 
 
     def blit_pxarray(self, colourkey=None):
         surf = pg.surfarray.make_surface(self.pxarray.swapaxes(0, 1))
-        surf = pg.transform.scale(surf, self.dims)
+        surf = pg.transform.scale(surf, self.domain_dims.round())
 
         if colourkey is not None:
             surf.set_colorkey(colourkey)
         
-        self.window.blit(surf, (0, 0))
+        self.window.blit(surf, self.blit_offset)
 
     # TODO: copy functions from graphics.py

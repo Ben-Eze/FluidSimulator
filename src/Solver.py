@@ -44,8 +44,8 @@ class Solver:
         self.name = spec["name"]
         self.fluid = Fluid(spec)
         self.log = Log(spec["log"])
-        self.gui = GUI(self)
         self.display = Display(spec, self)
+        self.gui = GUI(self)
         self.name_string = f"({self.name}) " if self.name is not None else ""
         self.mainloop = Mainloop(self)
         
