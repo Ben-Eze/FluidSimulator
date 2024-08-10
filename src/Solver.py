@@ -36,23 +36,25 @@ from src.Log import Log
 from src.Display import Display
 from src.Fluid import Fluid
 from src.Mainloop import Mainloop
+from src.GUI import GUI
 
 
 class Solver:
     def __init__(self) -> None:
         self.name = spec["name"]
-        self.fluid = Fluid(spec["fluid"])
+        self.fluid = Fluid(spec)
         self.log = Log(spec["log"])
-        self.display = Display(spec)
+        self.gui = GUI(self)
+        self.display = Display(spec, self)
         self.name_string = f"({self.name}) " if self.name is not None else ""
         self.mainloop = Mainloop(self)
         
         self.log(f"Solver {self.name_string}initialised")
     
     def __del__(self):
-        self.log(f"Solver {self.name_string}finished with exit code 0")
+        # self.log(f"Solver {self.name_string}finished with exit code 0")
+        pass
     
     def run(self):
         self.log(f"Solver {self.name_string}running...")
         self.mainloop()
-        

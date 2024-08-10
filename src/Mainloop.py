@@ -38,18 +38,20 @@ class Mainloop:
     def __init__(self, solver):
         self.solver = solver
         self.display = solver.display
+        self.gui = solver.gui
 
-    @staticmethod
-    def init():
+    def init(self):
         events = pg.event.get()
+
+        self.gui(events)
 
         for event in events:
             if event.type == pg.QUIT:
                 return 1
 
-    def __call__(self, ):
+    def __call__(self):
         while True:
-            if Mainloop.init():
+            if self.init():
                 break
 
             # self.solver()

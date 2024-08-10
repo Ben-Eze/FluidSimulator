@@ -33,4 +33,88 @@
 ################################################################################
 
 
+import numpy as np
 import pygame as pg
+
+
+class GUI:
+    def __init__(self, solver):
+        self.mouse = Mouse()
+        self.solver = solver
+        self.fluid = solver.fluid
+    
+    def __call__(self, events):
+        self.mouse.init(events)
+        self.fluid_interaction()
+
+    def fluid_interaction(self):
+    
+        # g.d[g.array_centre[1], g.array_centre[0]] += 500
+
+        if self.mouse.state == 2:
+            self.mouse.pos_prev = self.mouse.pos.copy()
+
+        if self.mouse.press:
+            for mouse_pos in self.mouse.pos_stack:
+                # mouse_index = (mouse_pos[::-1]/g.sf).astype(int)
+                mouse_index = (mouse_pos[::-1]).astype(int)
+                
+                if not self.fluid.walls[mouse_index[0], mouse_index[1]]:
+                    velocity = (self.mouse.pos - self.mouse.pos_prev)
+                    # print(mouse_index)
+                    self.fluid.d[mouse_index[0], mouse_index[1]] += 1500/len(self.mouse.pos_stack)
+                    self.fluid.u[mouse_index[0], mouse_index[1]] = velocity[0]
+                    self.fluid.v[mouse_index[0], mouse_index[1]] = velocity[1]
+                    # g.u[g.array_centre[1], g.array_centre[0]] = velocity[0]
+                    # g.v[g.array_centre[1], g.array_centre[0]] = velocity[1]
+
+
+class Mouse:
+    def __init__(self):
+        self.pos = None
+        self.pos_prev = None
+        self.pos_stack = []
+        self.press = 0
+
+        self.state = 0
+        #  0: not pressed
+        # -1: just unpressed
+        #  1: held down
+        #  2: just pressed
+    
+    def init(self, events):
+        self.get_state()
+        self.get_pos_stack(events)
+        self.get_pos()
+
+    def get_state(self):
+        self.press = pg.mouse.get_pressed()[0]
+        if self.press:
+            if self.state == 2:
+                self.state = 1
+            elif self.state != 1:
+                self.state = 2
+        else:
+            if self.state == -1:
+                self.state = 0
+            elif self.state != 0:
+                self.state = -1
+
+    def get_pos(self, array=True):
+        if self.pos is not None:
+            self.pos_prev = self.pos.copy()
+
+        self.pos = np.array(pg.mouse.get_pos(), dtype=float) if array \
+                       else pg.mouse.get_pos()
+    
+    def get_pos_stack(self, events, array=True):
+        self.pos_stack = []
+
+        for event in events:
+            if event.type == pg.MOUSEMOTION:
+                pos = event.__dict__["pos"]
+                self.pos_stack.append(np.array(pos) if array else pos)
+                
+        if not self.pos_stack:  # if not moving
+            pos = pg.mouse.get_pos()
+            self.pos_stack.append(np.array(pos) if array else pos)
