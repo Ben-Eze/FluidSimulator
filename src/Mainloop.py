@@ -1,6 +1,6 @@
 ################################################################################
 ##
-##  File: Fluid.py
+##  File: Mainloop.py
 ##
 ##  The MIT License
 ##
@@ -26,15 +26,31 @@
 ##  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ##  DEALINGS IN THE SOFTWARE.
 ##
-##  Description:  Implements the Fluid class, which contains parameters for the 
-##                fluid (eg. velocity, density)
+##  Description:  Implements the Mainloop class, which has a while loop that    ##                repeats until a break condition is met
 ##
 ################################################################################
 
 
-class Fluid:
-    def __init__(self, fluid_spec) -> None:
-        self.name = fluid_spec["name"] if fluid_spec["name"] is not None \
-            else "unknown_fluid"
-        
-        print(f"Fluid ({self.name}) initialised")
+import pygame as pg
+
+
+class Mainloop:
+    def __init__(self, solver):
+        self.solver = solver
+        self.display = solver.display
+
+    @staticmethod
+    def init():
+        events = pg.event.get()
+
+        for event in events:
+            if event.type == pg.QUIT:
+                return 1
+
+    def __call__(self, ):
+        while True:
+            if Mainloop.init():
+                break
+
+            # self.solver()
+            self.display()

@@ -35,6 +35,7 @@ from assets.solver_config import spec
 from src.Log import Log
 from src.Display import Display
 from src.Fluid import Fluid
+from src.Mainloop import Mainloop
 
 
 class Solver:
@@ -42,8 +43,9 @@ class Solver:
         self.name = spec["name"]
         self.fluid = Fluid(spec["fluid"])
         self.log = Log(spec["log"])
-        self.display = Display(spec["display"])
+        self.display = Display(spec)
         self.name_string = f"({self.name}) " if self.name is not None else ""
+        self.mainloop = Mainloop(self)
         
         self.log(f"Solver {self.name_string}initialised")
     
@@ -52,3 +54,5 @@ class Solver:
     
     def run(self):
         self.log(f"Solver {self.name_string}running...")
+        self.mainloop()
+        

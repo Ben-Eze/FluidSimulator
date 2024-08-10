@@ -1,10 +1,15 @@
 spec = {
     "name": "TestSolver",
 
-    "grid": {                                           # TODO
+    "domain": {                                           # TODO
         "width": 1.5,
         "height": 1,
-        "base_size": 0.01
+        "base_size": 0.01,
+    },
+
+    "time": {                                           # TODO
+        "dt": 0.01,
+        "t_max": 0
     },
 
     "BCs": {                                            # TODO
@@ -14,7 +19,7 @@ spec = {
         # TODO: Dirichlet AND Neumann BC support
     },
 
-    "ICs": {},
+    "ICs": {},                                          # TODO
 
     "fluid": {
         "name": "air",
