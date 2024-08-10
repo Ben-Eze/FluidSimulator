@@ -32,6 +32,40 @@
 ################################################################################
 
 
+import ctypes
+import numpy as np
+import pygame as pg
+
+
 class Display:
-    def __init__(self, display_config):
-        pass
+    def __init__(self, config):
+        pg.init()
+        ctypes.windll.user32.SetProcessDPIAware()   # sorts out screen bug
+        
+        max_w = config["display"]["max_width"]
+        max_h = config["display"]["max_height"]
+        self.dims = np.array([max_w, max_h])    # make more advanced
+
+        self.window = pg.display.set_mode(self.dims)
+        # particle_surf = pg.Surface(self.dims, pg.SRCALPHA, 32)    # implement later
+
+        self.Nx = int(config["domain"]["width"] / config["domain"]["base_size"])
+        self.Ny = int(config["domain"]["height"] / config["domain"]["base_size"])
+        self.pxarray = np.zeros((self.Ny, self.Nx, 3))
+
+        self.background_colour = (0, 0, 0)
+
+    def __call__(self):
+        self.window.fill(self.background_colour)
+        pg.display.update()
+
+    def blit_pxarray(self, pxarray, colourkey=None):
+        surf = pg.surfarray.make_surface(pxarray.swapaxes(0, 1))
+        surf = pg.transform.scale(surf, self.dims)
+
+        if colourkey is not None:
+            surf.set_colorkey(colourkey)
+        
+        self.window.blit(surf, (0, 0))
+
+    # TODO: copy functions from graphics.py
