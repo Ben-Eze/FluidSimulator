@@ -32,9 +32,46 @@
 ################################################################################
 
 
+import numpy as np
+
+
 class Fluid:
-    def __init__(self, fluid_spec) -> None:
+    def __init__(self, spec) -> None:
+        fluid_spec = spec["fluid"]
         self.name = fluid_spec["name"] if fluid_spec["name"] is not None \
             else "unknown_fluid"
+    
+        # Domain
+        self.x_max = spec["domain"]["width"]
+        self.y_max = spec["domain"]["height"]
+        self.base_size = spec["domain"]["base_size"]
+
+        self.Nx = int(np.ceil(self.x_max / self.base_size))
+        self.Ny = int(np.ceil(self.y_max / self.base_size))
+        self.IX, self.IY = np.meshgrid(np.arange(self.Nx), np.arange(self.Ny))
+
+        self.x_lin = np.linspace(0, self.x_max, self.Nx, endpoint=False)
+        self.y_lin = np.linspace(0, self.y_max, self.Ny, endpoint=False)
+        self.X, self.Y = np.meshgrid(self.x_lin, self.y_lin)
+
+        self.dx = self.x_max / self.Nx
+        self.dy = self.y_max / self.Ny
+
+        self.walls = np.zeros((self.Ny, self.Nx))
+
+        # Initial conditions
+        self.u = np.zeros((self.Ny, self.Nx))
+        self.U = np.zeros((self.Ny, self.Nx))
+
+        self.v = np.zeros((self.Ny, self.Nx))
+        self.V = np.zeros((self.Ny, self.Nx))
+
+        self.p = np.zeros((self.Ny, self.Nx))
+
+        self.d = np.zeros((self.Ny, self.Nx))
+        
+        # Properties
+        self.rho = fluid_spec["density"]
+        self.nu = fluid_spec["viscosity"]
         
         print(f"Fluid ({self.name}) initialised")

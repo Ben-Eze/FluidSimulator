@@ -38,7 +38,7 @@ import pygame as pg
 
 
 class Display:
-    def __init__(self, config):
+    def __init__(self, config, solver):
         pg.init()
         ctypes.windll.user32.SetProcessDPIAware()   # sorts out screen bug
         
@@ -55,12 +55,21 @@ class Display:
 
         self.background_colour = (0, 0, 0)
 
+        self.fluid = solver.fluid
+
     def __call__(self):
         self.window.fill(self.background_colour)
+        self.update_pxarray()
+        self.blit_pxarray()
         pg.display.update()
+    
+    def update_pxarray(self):
+        # in reality will be replaced with individual functions
+        self.pxarray[..., 0] = self.pxarray[..., 1] = self.pxarray[..., 2] = 255 * np.clip(self.fluid.d, 0, 1)
 
-    def blit_pxarray(self, pxarray, colourkey=None):
-        surf = pg.surfarray.make_surface(pxarray.swapaxes(0, 1))
+
+    def blit_pxarray(self, colourkey=None):
+        surf = pg.surfarray.make_surface(self.pxarray.swapaxes(0, 1))
         surf = pg.transform.scale(surf, self.dims)
 
         if colourkey is not None:
