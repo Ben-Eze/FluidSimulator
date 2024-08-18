@@ -58,9 +58,14 @@ class GUI:
                     (mouse_pos - self.display.blit_offset)/self.display.sf
                 )[::-1].astype(int)
                 
-                if not self.fluid.walls[mouse_index[0], mouse_index[1]]:
+                if (0 <= mouse_index[1] < self.fluid.Nx
+                    and 0 <= mouse_index[0] < self.fluid.Ny
+                    and not self.fluid.walls[mouse_index[0], mouse_index[1]]
+                ):
+                    print(mouse_index, (self.fluid.Ny, self.fluid.Nx))
                     velocity = (self.mouse.pos - self.mouse.pos_prev)
-                    self.fluid.d[mouse_index[0], mouse_index[1]] += 1500/len(self.mouse.pos_stack)
+                    self.fluid.d[mouse_index[0], mouse_index[1]] \
+                        += 1500/len(self.mouse.pos_stack)
                     self.fluid.u[mouse_index[0], mouse_index[1]] = velocity[0]
                     self.fluid.v[mouse_index[0], mouse_index[1]] = velocity[1]
                     # g.u[g.array_centre[1], g.array_centre[0]] = velocity[0]
