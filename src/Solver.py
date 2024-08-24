@@ -81,8 +81,8 @@ class Solver:
     @staticmethod
     def diffuseEE_dx_is_dy(D, fluid_domain, nu, dx, dt, nit):
         """
-        Diffuse scalar field D with the Explicit Euler scheme, diffusion 
-        constant k
+        Diffuse the scalar field D with the Explicit Euler scheme
+        Assumption: dx = dt
         """
 
         k = 4 * nu * dt / dx**2
@@ -99,10 +99,16 @@ class Solver:
                 / (1 + k))
         return D_new
 
-    # @staticmethod
-    # def diffuseIE(D, fluid_domain, k):
-    #     """
-    #     Diffuse scalar field D with the Implicit Euler scheme, diffusion 
-    #     constant k
-    #     """
-    #     return D
+    @staticmethod
+    def diffuseIE_dx_is_dy(D, nu, dx, dt):
+        """
+        Diffuse the scalar field D with the Explicit Euler scheme
+        Assumption: dx = dt
+        """
+        # D[1:-1, 1:-1][fluid_domain] = D
+        k = 4 * nu * dt / dx**2
+        M = (D[2:, 1:-1] + D[:-2, 1:-1] + D[1:-1, 2:] + D[1:-1, :-2]) / 4
+
+        D[1:-1, 1:-1] = D[1:-1, 1:-1] * (1 - k) + k * M
+
+        return D

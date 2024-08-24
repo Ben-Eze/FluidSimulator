@@ -117,7 +117,9 @@ class Fluid:
     def set_diffusion_solver(self):
         if (self.solver.solver_type == "ImplicitEuler" 
         and self.solver.dx_is_dy):
-            warnings.warn("IE,dx==dy not yet implemented")
+            self.diffuse = lambda D: self.solver.diffuseIE_dx_is_dy(
+                D, self.nu, self.dx, self.solver.dt
+            )
         
         elif (self.solver.solver_type == "ImplicitEuler" 
         and not self.solver.dx_is_dy):
