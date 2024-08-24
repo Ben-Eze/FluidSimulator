@@ -64,7 +64,7 @@ class GUI:
                 ):
                     # TODO: toggle velocity and smoke interaction (ie should be 
                     # able to do one without the other)
-                    velocity = (self.mouse.pos - self.mouse.pos_prev)
+                    velocity = (self.mouse.pos - self.mouse.pos_prev) / self.solver.dt
                     # dividing by pos_stack ensures constant smoke addition per 
                     # time step
                     # dividing by base_size^2 ensures constant smoke addition 

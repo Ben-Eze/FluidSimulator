@@ -36,36 +36,6 @@ import numpy as np
 import warnings
 
 
-# def convect(D, u, v, dx, dy, dt, IX, IY, domain):
-#     """
-#     Convect scalar field D in accordance with the velocity field (u, v)
-#     """
-
-#     # IX_prev, IY_prev are the (index) coordinates where we are convecting D 
-#     # from
-#     x = (IX - u * dt / dx)
-#     y = (IY - v * dt / dy)
-
-#     nx, ny = IX.shape()
-#     x0 = np.clip(np.floor(x), 0, nx-1).astype(int)
-#     y0 = np.clip(np.floor(y), 0, ny-1).astype(int)
-#     x1 = np.clip(x0 + 1, 0, nx-1)
-#     y1 = np.clip(y0 + 1, 0, ny-1)
-#     frac_x = x%1
-#     frac_y = y%1
-
-#     D00 = D[y0, x0]
-#     D01 = D[y0, x1]
-#     D10 = D[y1, x0]
-#     D11 = D[y1, x1]
-
-#     D0f = (1-frac_x)*D00 + frac_x*D01
-#     D1f = (1-frac_x)*D10 + frac_x*D11
-#     Dff = D.copy()
-#     Dff[domain] = ((1-frac_y)*D0f + frac_y*D1f)[domain]
-
-#     return Dff
-
 class Fluid:
     def __init__(self, spec, solver) -> None:
         fluid_spec = spec["fluid"]
@@ -111,6 +81,9 @@ class Fluid:
 
         self.diffuse = None
         self.set_diffusion_solver()
+
+        self.advect = None
+        self.set_advection_solver()
         
         print(f"Fluid ({self.name}) initialised")
     
@@ -137,11 +110,15 @@ class Fluid:
             warnings.warn("EE,dx!=dy not yet implemented")
         else:
             warnings.warn(f"Solver '{self.solver.solver_type}' not recognised")
+    
+    def set_advection_solver(self):
+        self.advect = lambda D: self.solver.advect(
+            D, self.where_fluid, self.u, self.v, 
+            self.dx, self.dy, self.IX, self.IY, 
+            self.solver.dt)
 
     def diffuse_smoke(self):
         self.d[self.where_fluid] = self.diffuse(self.d)[self.where_fluid]
     
-    # def convect_smoke(self):
-    #     self.d[self.where_fluid] = convect(
-    #         self.d, self.u, self.v, self.IX, self.IY, self.nx, self.ny
-    #     )[self.where_fluid]
+    def advect_smoke(self):
+        self.d[self.where_fluid] = self.advect(self.d)[self.where_fluid]

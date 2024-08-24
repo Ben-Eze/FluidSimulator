@@ -73,10 +73,10 @@ class Solver:
     
     def solve(self):
         self.fluid.diffuse_smoke()
-        # self.fluid.convect_smoke()
+        self.fluid.advect_smoke()
         
         # self.fluid.diffuse_velocity()
-        # self.fluid.convect_velocity()
+        # self.fluid.advect_velocity()
     
     @staticmethod
     def diffuseEE_dx_is_dy(D, fluid_domain, nu, dx, dt, nit):
@@ -105,10 +105,40 @@ class Solver:
         Diffuse the scalar field D with the Explicit Euler scheme
         Assumption: dx = dt
         """
-        # D[1:-1, 1:-1][fluid_domain] = D
         k = 4 * nu * dt / dx**2
         M = (D[2:, 1:-1] + D[:-2, 1:-1] + D[1:-1, 2:] + D[1:-1, :-2]) / 4
 
         D[1:-1, 1:-1] = D[1:-1, 1:-1] * (1 - k) + k * M
 
         return D
+
+    @staticmethod
+    def advect(D, fluid_domain, u, v, dx, dy, IX, IY, dt):
+        """
+        Advect scalar field D in accordance with the velocity field (u, v)
+        """
+
+        # IX_prev, IY_prev are the (index) coordinates where we are advecting 
+        # D from
+        IX_prev = (IX - u * dt / dx)
+        IY_prev = (IY - v * dt / dy)
+
+        ny, nx = IX.shape
+        x0 = np.clip(np.floor(IX_prev), 0, nx-1).astype(int)
+        y0 = np.clip(np.floor(IY_prev), 0, ny-1).astype(int)
+        x1 = np.clip(x0 + 1, 0, nx-1)
+        y1 = np.clip(y0 + 1, 0, ny-1)
+        frac_x = IX_prev%1
+        frac_y = IY_prev%1
+
+        D00 = D[y0, x0]
+        D01 = D[y0, x1]
+        D10 = D[y1, x0]
+        D11 = D[y1, x1]
+
+        D0f = (1-frac_x)*D00 + frac_x*D01
+        D1f = (1-frac_x)*D10 + frac_x*D11
+        Dff = D.copy()
+        Dff[fluid_domain] = ((1-frac_y)*D0f + frac_y*D1f)[fluid_domain]
+
+        return Dff
