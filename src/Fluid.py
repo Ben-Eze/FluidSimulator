@@ -91,5 +91,7 @@ class Fluid:
         
         print(f"Fluid ({self.name}) initialised")
 
-    def diffuse_smoke(self, k, nit):
-        self.d = diffuse(self.d, self.where_inner_fluid, k, nit)
+    def diffuse_smoke(self, nit):
+        self.d = diffuse(
+            self.d, self.where_inner_fluid, self.nu/self.base_size, nit
+        )

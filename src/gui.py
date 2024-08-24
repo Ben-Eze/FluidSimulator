@@ -62,14 +62,20 @@ class GUI:
                     and 0 <= mouse_index[0] < self.fluid.Ny
                     and not self.fluid.walls[mouse_index[0], mouse_index[1]]
                 ):
-                    print(mouse_index, (self.fluid.Ny, self.fluid.Nx))
+                    # TODO: toggle velocity and smoke interaction (ie should be 
+                    # able to do one without the other)
                     velocity = (self.mouse.pos - self.mouse.pos_prev)
-                    self.fluid.d[mouse_index[0], mouse_index[1]] \
-                        += 1500/len(self.mouse.pos_stack)
+                    # dividing by pos_stack ensures constant smoke addition per 
+                    # time step
+                    # dividing by base_size^2 ensures constant smoke addition 
+                    # per unit area
+                    self.fluid.d[mouse_index[0], mouse_index[1]] += (
+                        0.1/len(self.mouse.pos_stack)/(self.fluid.base_size**2)
+                    )
+
+                    # the velocity field is also affected by dragging the mouse
                     self.fluid.u[mouse_index[0], mouse_index[1]] = velocity[0]
                     self.fluid.v[mouse_index[0], mouse_index[1]] = velocity[1]
-                    # g.u[g.array_centre[1], g.array_centre[0]] = velocity[0]
-                    # g.v[g.array_centre[1], g.array_centre[0]] = velocity[1]
 
 
 class Mouse:

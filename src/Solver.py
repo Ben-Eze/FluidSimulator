@@ -50,6 +50,8 @@ class Solver:
         self.gui = GUI(self)
         self.name_string = f"({self.name}) " if self.name is not None else ""
         self.mainloop = Mainloop(self)
+        self.solver_type = spec["scheme"]["name"]
+        self.nit = spec["scheme"]["nit"]
         
         self.log(f"Solver {self.name_string}initialised")
     
@@ -62,7 +64,7 @@ class Solver:
         self.mainloop()
     
     def solve(self):
-        self.fluid.diffuse_smoke(k=1, nit=5)
+        self.fluid.diffuse_smoke(self.nit)
         # self.fluid.diffuse_velocity()
         # self.fluid.convect_smoke()
         # self.fluid.convect_velocity()
