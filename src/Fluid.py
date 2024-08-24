@@ -121,15 +121,15 @@ class Fluid:
         self.u[self.where_fluid] = self.diffuse(self.u)[self.where_fluid]
         self.v[self.where_fluid] = self.diffuse(self.v)[self.where_fluid]
    
-    # def enforce_continuity(self):
-    #     self.p[self.where_wall] = 0
-    #     p, u, v = self.solver.extract_divfree(
-    #         self.u, self.v, self.p, self.dx, self.dy, 
-    #         self.solver.nit, self.where_inner_fluid
-    #     )
-    #     self.p[self.where_fluid] = p[self.where_fluid]
-    #     self.u[self.where_fluid] = u[self.where_fluid]
-    #     self.v[self.where_fluid] = v[self.where_fluid]
+    def enforce_continuity(self):
+        self.p[self.where_wall] = 0
+        p, u, v = self.solver.extract_divfree(
+            self.u, self.v, self.p, self.dx, self.dy, 
+            self.solver.nit, self.where_inner_fluid
+        )
+        self.p[self.where_fluid] = p[self.where_fluid]
+        self.u[self.where_fluid] = u[self.where_fluid]
+        self.v[self.where_fluid] = v[self.where_fluid]
     
     # def advect_velocity(self):
     #     u_new = convect(g.u, g.u, g.v, g.IX, g.IY, g.nx, g.ny)
