@@ -42,9 +42,9 @@ class Display:
         pg.init()
         ctypes.windll.user32.SetProcessDPIAware()   # sorts out screen bug
         
-        max_w = config["display"]["max_width"]
-        max_h = config["display"]["max_height"]
-        self.dims = np.array([max_w, max_h])    # make more advanced
+        w = config["display"]["width"]
+        h = config["display"]["height"]
+        self.dims = np.array([w, h])
 
         self.window = pg.display.set_mode(self.dims, flags=pg.RESIZABLE)
         # particle_surf = pg.Surface(self.dims, pg.SRCALPHA, 32)    # implement later
