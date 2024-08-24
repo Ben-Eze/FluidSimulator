@@ -117,6 +117,25 @@ class Fluid:
             self.dx, self.dy, self.IX, self.IY, 
             self.solver.dt)
 
+    def diffuse_velocity(self):
+        self.u[self.where_fluid] = self.diffuse(self.u)[self.where_fluid]
+        self.v[self.where_fluid] = self.diffuse(self.v)[self.where_fluid]
+   
+    # def enforce_continuity(self):
+    #     self.p[self.where_wall] = 0
+    #     p, u, v = self.solver.extract_divfree(
+    #         self.u, self.v, self.p, self.dx, self.dy, 
+    #         self.solver.nit, self.where_inner_fluid
+    #     )
+    #     self.p[self.where_fluid] = p[self.where_fluid]
+    #     self.u[self.where_fluid] = u[self.where_fluid]
+    #     self.v[self.where_fluid] = v[self.where_fluid]
+    
+    # def advect_velocity(self):
+    #     u_new = convect(g.u, g.u, g.v, g.IX, g.IY, g.nx, g.ny)
+    #     g.v[g.where_fluid] = convect(g.v, g.u, g.v, g.IX, g.IY, g.nx, g.ny)[g.where_fluid]
+    #     g.u[g.where_fluid] = u_new[g.where_fluid]
+
     def diffuse_smoke(self):
         self.d[self.where_fluid] = self.diffuse(self.d)[self.where_fluid]
     
