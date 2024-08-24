@@ -31,6 +31,7 @@
 ################################################################################
 
 
+import warnings
 import numpy as np
 
 from assets.solver_config import spec
@@ -44,15 +45,22 @@ from src.GUI import GUI
 class Solver:
     def __init__(self) -> None:
         self.name = spec["name"]
-        self.fluid = Fluid(spec)
-        self.log = Log(spec["log"])
-        self.display = Display(spec, self)
-        self.gui = GUI(self)
-        self.name_string = f"({self.name}) " if self.name is not None else ""
-        self.mainloop = Mainloop(self)
-        self.solver_type = spec["scheme"]["name"]
-        self.nit = spec["scheme"]["nit"]
         
+        self.solver_type = spec["scheme"]["name"]
+        self.dx_is_dy = spec["scheme"]["dx==dy"]
+        self.nit = spec["scheme"]["nit"]
+        self.dt = spec["time"]["dt"]
+        self.fluid = Fluid(spec, self)
+        
+        self.log = Log(spec["log"])
+        
+        self.display = Display(spec, self)
+        
+        self.gui = GUI(self)
+        
+        self.mainloop = Mainloop(self)
+        
+        self.name_string = f"({self.name}) " if self.name is not None else ""
         self.log(f"Solver {self.name_string}initialised")
     
     def __del__(self):
@@ -64,7 +72,37 @@ class Solver:
         self.mainloop()
     
     def solve(self):
-        self.fluid.diffuse_smoke(self.nit)
-        # self.fluid.diffuse_velocity()
+        self.fluid.diffuse_smoke()
         # self.fluid.convect_smoke()
+        
+        # self.fluid.diffuse_velocity()
         # self.fluid.convect_velocity()
+    
+    @staticmethod
+    def diffuseEE_dx_is_dy(D, fluid_domain, nu, dx, dt, nit):
+        """
+        Diffuse scalar field D with the Explicit Euler scheme, diffusion 
+        constant k
+        """
+
+        k = 4 * nu * dt / dx**2
+        D_new = np.copy(D)
+
+        # iteratively progress D to satisfy the equation 
+        for _ in range(nit):
+            D_new[1:-1, 1:-1][fluid_domain] = (
+                (D[1:-1, 1:-1][fluid_domain] 
+                + 0.25*k*(D_new[2:, 1:-1][fluid_domain] 
+                        + D_new[:-2, 1:-1][fluid_domain] 
+                        + D_new[1:-1, 2:][fluid_domain] 
+                        + D_new[1:-1, :-2][fluid_domain])) 
+                / (1 + k))
+        return D_new
+
+    # @staticmethod
+    # def diffuseIE(D, fluid_domain, k):
+    #     """
+    #     Diffuse scalar field D with the Implicit Euler scheme, diffusion 
+    #     constant k
+    #     """
+    #     return D

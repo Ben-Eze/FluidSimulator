@@ -33,25 +33,45 @@
 
 
 import numpy as np
+import warnings
 
 
-def diffuse(d, fluid_domain, k, nit):
-    D = np.copy(d)
-    for it in range(nit):
-        D[1:-1, 1:-1][fluid_domain] = (
-            (d[1:-1, 1:-1][fluid_domain] 
-            + 0.25*k*(D[2:, 1:-1][fluid_domain] 
-                    + D[:-2, 1:-1][fluid_domain] 
-                    + D[1:-1, 2:][fluid_domain] 
-                    + D[1:-1, :-2][fluid_domain])) 
-            / (1 + k))
-    return D
+# def convect(D, u, v, dx, dy, dt, IX, IY, domain):
+#     """
+#     Convect scalar field D in accordance with the velocity field (u, v)
+#     """
+
+#     # IX_prev, IY_prev are the (index) coordinates where we are convecting D 
+#     # from
+#     x = (IX - u * dt / dx)
+#     y = (IY - v * dt / dy)
+
+#     nx, ny = IX.shape()
+#     x0 = np.clip(np.floor(x), 0, nx-1).astype(int)
+#     y0 = np.clip(np.floor(y), 0, ny-1).astype(int)
+#     x1 = np.clip(x0 + 1, 0, nx-1)
+#     y1 = np.clip(y0 + 1, 0, ny-1)
+#     frac_x = x%1
+#     frac_y = y%1
+
+#     D00 = D[y0, x0]
+#     D01 = D[y0, x1]
+#     D10 = D[y1, x0]
+#     D11 = D[y1, x1]
+
+#     D0f = (1-frac_x)*D00 + frac_x*D01
+#     D1f = (1-frac_x)*D10 + frac_x*D11
+#     Dff = D.copy()
+#     Dff[domain] = ((1-frac_y)*D0f + frac_y*D1f)[domain]
+
+#     return Dff
 
 class Fluid:
-    def __init__(self, spec) -> None:
+    def __init__(self, spec, solver) -> None:
         fluid_spec = spec["fluid"]
         self.name = fluid_spec["name"] if fluid_spec["name"] is not None \
             else "unknown_fluid"
+        self.solver = solver
     
         # Domain
         self.x_max = spec["domain"]["width"]
@@ -88,10 +108,38 @@ class Fluid:
         # Properties
         self.rho = fluid_spec["density"]
         self.nu = fluid_spec["viscosity"]
+
+        self.diffuse = None
+        self.set_diffusion_solver()
         
         print(f"Fluid ({self.name}) initialised")
+    
+    def set_diffusion_solver(self):
+        if (self.solver.solver_type == "ImplicitEuler" 
+        and self.solver.dx_is_dy):
+            warnings.warn("IE,dx==dy not yet implemented")
+        
+        elif (self.solver.solver_type == "ImplicitEuler" 
+        and not self.solver.dx_is_dy):
+            warnings.warn("IE,dx!=dy not yet implemented")
 
-    def diffuse_smoke(self, nit):
-        self.d = diffuse(
-            self.d, self.where_inner_fluid, self.nu/self.base_size, nit
-        )
+        elif (self.solver.solver_type == "ExplicitEuler" 
+        and self.solver.dx_is_dy):
+            self.diffuse = lambda D: self.solver.diffuseEE_dx_is_dy(
+                D, self.where_inner_fluid, self.nu, self.dx, 
+                self.solver.dt, self.solver.nit
+            )
+
+        elif (self.solver.solver_type == "ExplicitEuler" 
+        and self.solver.dx_is_dy):
+            warnings.warn("EE,dx!=dy not yet implemented")
+        else:
+            warnings.warn(f"Solver '{self.solver.solver_type}' not recognised")
+
+    def diffuse_smoke(self):
+        self.d[self.where_fluid] = self.diffuse(self.d)[self.where_fluid]
+    
+    # def convect_smoke(self):
+    #     self.d[self.where_fluid] = convect(
+    #         self.d, self.u, self.v, self.IX, self.IY, self.nx, self.ny
+    #     )[self.where_fluid]
