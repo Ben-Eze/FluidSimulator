@@ -64,7 +64,7 @@ class GUI:
                 ):
                     # TODO: toggle velocity and smoke interaction (ie should be 
                     # able to do one without the other)
-                    velocity = (self.mouse.pos - self.mouse.pos_prev) / self.solver.dt
+                    delta_pos = self.mouse.pos - self.mouse.pos_prev
                     # dividing by pos_stack ensures constant smoke addition per 
                     # time step
                     # dividing by base_size^2 ensures constant smoke addition 
@@ -74,8 +74,12 @@ class GUI:
                     )
 
                     # the velocity field is also affected by dragging the mouse
-                    self.fluid.u[mouse_index[0], mouse_index[1]] = velocity[0]
-                    self.fluid.v[mouse_index[0], mouse_index[1]] = velocity[1]
+                    self.fluid.u[mouse_index[0], mouse_index[1]] = (
+                        delta_pos[0] * self.fluid.dx / self.solver.dt
+                    )
+                    self.fluid.v[mouse_index[0], mouse_index[1]] = (
+                        delta_pos[1] * self.fluid.dy / self.solver.dt
+                    )
 
 
 class Mouse:
