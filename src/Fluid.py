@@ -35,6 +35,18 @@
 import numpy as np
 
 
+def diffuse(d, fluid_domain, k, nit):
+    D = np.copy(d)
+    for it in range(nit):
+        D[1:-1, 1:-1][fluid_domain] = (
+            (d[1:-1, 1:-1][fluid_domain] 
+            + 0.25*k*(D[2:, 1:-1][fluid_domain] 
+                    + D[:-2, 1:-1][fluid_domain] 
+                    + D[1:-1, 2:][fluid_domain] 
+                    + D[1:-1, :-2][fluid_domain])) 
+            / (1 + k))
+    return D
+
 class Fluid:
     def __init__(self, spec) -> None:
         fluid_spec = spec["fluid"]
@@ -58,6 +70,9 @@ class Fluid:
         self.dy = self.y_max / self.Ny
 
         self.walls = np.zeros((self.Ny, self.Nx))
+        self.where_wall = np.where(self.walls)
+        self.where_fluid = np.where(1 - self.walls)
+        self.where_inner_fluid = np.where(1 - self.walls[1:-1, 1:-1])
 
         # Initial conditions
         self.u = np.zeros((self.Ny, self.Nx))
@@ -75,3 +90,6 @@ class Fluid:
         self.nu = fluid_spec["viscosity"]
         
         print(f"Fluid ({self.name}) initialised")
+
+    def diffuse_smoke(self, k, nit):
+        self.d = diffuse(self.d, self.where_inner_fluid, k, nit)

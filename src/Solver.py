@@ -31,6 +31,8 @@
 ################################################################################
 
 
+import numpy as np
+
 from assets.solver_config import spec
 from src.Log import Log
 from src.Display import Display
@@ -58,3 +60,9 @@ class Solver:
     def run(self):
         self.log(f"Solver {self.name_string}running...")
         self.mainloop()
+    
+    def solve(self):
+        self.fluid.diffuse_smoke(k=1, nit=5)
+        # self.fluid.diffuse_velocity()
+        # self.fluid.convect_smoke()
+        # self.fluid.convect_velocity()

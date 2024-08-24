@@ -57,5 +57,5 @@ class Mainloop:
             if self.init():
                 break
 
-            # self.solver()
+            self.solver.solve()
             self.display()
