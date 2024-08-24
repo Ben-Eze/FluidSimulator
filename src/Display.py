@@ -90,9 +90,7 @@ class Display:
         self.pxarray[..., 1] = self.fluid_colour[1]
         self.pxarray[..., 2] = self.fluid_colour[2]
 
-        self.pxarray[..., 0] += 255 * self.fluid.d
-        self.pxarray[..., 1] += 255 * self.fluid.d
-        self.pxarray[..., 2] += 255 * self.fluid.d
+        self.draw_smoke()
 
         self.pxarray = np.clip(self.pxarray, 0, 255)
 
@@ -106,4 +104,5 @@ class Display:
         
         self.window.blit(surf, self.blit_offset)
 
-    # TODO: copy functions from graphics.py
+    def draw_smoke(self):
+        self.pxarray += np.expand_dims(self.fluid.d, axis=2)
