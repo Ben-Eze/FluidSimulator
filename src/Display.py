@@ -90,7 +90,8 @@ class Display:
         self.pxarray[..., 1] = self.fluid_colour[1]
         self.pxarray[..., 2] = self.fluid_colour[2]
 
-        self.draw_smoke()
+        # self.draw_smoke()
+        self.draw_vorticity()
 
         self.pxarray = np.clip(self.pxarray, 0, 255)
 
@@ -106,3 +107,12 @@ class Display:
 
     def draw_smoke(self):
         self.pxarray += np.expand_dims(self.fluid.d, axis=2)
+    
+    def draw_vorticity(self):
+        w = ((self.fluid.u[:-2, 1:-1] 
+            - self.fluid.u[2:, 1:-1]) / self.fluid.dx
+           + (self.fluid.v[1:-1, 2:] 
+            - self.fluid.v[1:-1, :-2]) / self.fluid.dy) * 5
+
+        self.pxarray[1:-1, 1:-1, 0] += np.clip(w, 0, 255)
+        self.pxarray[1:-1, 1:-1, 1] += np.clip(-w, 0, 255)
