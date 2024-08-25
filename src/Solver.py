@@ -73,9 +73,9 @@ class Solver:
     
     def solve(self):
         self.fluid.diffuse_velocity()
-        # self.fluid.enforce_continuity()
-        # self.fluid.advect_velocity()
-        # self.fluid.enforce_continuity()
+        self.fluid.enforce_continuity()
+        self.fluid.advect_velocity()
+        self.fluid.enforce_continuity()
         # self.fluid.velocity_BCs()
 
         self.fluid.diffuse_smoke()
@@ -147,21 +147,26 @@ class Solver:
         return Dff
     
     @staticmethod
-    def div(v_x, v_y):
-        # what there should be a dx, dy term...?
-        return .5 * (v_x[1:-1, 2:] - v_x[1:-1, :-2] + v_y[2:, 1:-1] - v_y[:-2, 1:-1])
+    def div_dx_not_dy(v_x, v_y, dx, dy):
+        return ((v_x[1:-1, 2:] - v_x[1:-1, :-2]) / dx 
+              + (v_y[2:, 1:-1] - v_y[:-2, 1:-1]) / dy) / 2
+    
+    @staticmethod
+    def div_dx_is_dy(v_x, v_y, dx):
+        return ((v_x[1:-1, 2:] - v_x[1:-1, :-2]) 
+              + (v_y[2:, 1:-1] - v_y[:-2, 1:-1])) / (2 * dx)
 
     @staticmethod
-    def extract_divfree(u, v, f, dx, dy, nit, where_inner_fluid):
-        div_v = Solver.div(u, v)
+    def extract_divfree(u, v, f, dx, dy, nit, where_inner_fluid, div):
+        div_v = div(u, v)
 
-        for it in range(nit):
-            f[1:-1, 1:-1] = (  (f[1:-1, 2:] + f[1:-1, :-2]) * dy**2
-                            + (f[2:, 1:-1] + f[:-2, 1:-1]) * dx**2
-                            - div_v) / 2 / (dy**2 + dx**2)
+        for _ in range(nit):
+            f[1:-1, 1:-1] = ((f[1:-1, 2:] + f[1:-1, :-2]) * dy**2
+                           + (f[2:, 1:-1] + f[:-2, 1:-1]) * dx**2
+                           - dx**2 * dy**2 * div_v) / (2 * (dy**2 + dx**2))
         
-        u_cf = .5 * (f[1:-1, 2:] - f[1:-1, :-2])
-        v_cf = .5 * (f[2:, 1:-1] - f[:-2, 1:-1])
+        u_cf = (f[1:-1, 2:] - f[1:-1, :-2]) / (2 * dx)
+        v_cf = (f[2:, 1:-1] - f[:-2, 1:-1]) / (2 * dy)
 
         u_df = u.copy()
         v_df = v.copy()
