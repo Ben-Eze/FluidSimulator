@@ -56,7 +56,7 @@ class Solver:
         
         self.display = Display(spec, self)
         
-        self.gui = GUI(self)
+        self.gui = GUI(spec["gui"], self)
         
         self.mainloop = Mainloop(self)
         

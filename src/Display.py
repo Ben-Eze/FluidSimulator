@@ -61,6 +61,7 @@ class Display:
         self.background_colour = (0, 0, 0)
         self.fluid_colour = (0, 0, 20)
 
+        self.solver = solver
         self.fluid = solver.fluid
 
     def __call__(self):
@@ -104,6 +105,22 @@ class Display:
             surf.set_colorkey(colourkey)
         
         self.window.blit(surf, self.blit_offset)
+        self.draw_brush()
+    
+    def draw_brush(self):
+        gui_surf = pg.Surface(self.dims, pg.SRCALPHA, 16)
+        gui_surf = gui_surf.convert_alpha()
+        alpha = 180 if self.solver.gui.mouse.state else 100
+        pg.draw.circle(
+            surface=gui_surf,
+            color=(100, 100, 100, alpha),
+            center=self.solver.gui.mouse.pos,
+            radius=self.solver.gui.brush_size,
+            width=3
+        )
+        self.window.blit(gui_surf, (0, 0))
+    
+# ---------------------------------------------------------------------------- #
 
     def draw_smoke(self):
         self.pxarray += np.expand_dims(self.fluid.d, axis=2)

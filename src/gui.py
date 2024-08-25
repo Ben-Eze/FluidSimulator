@@ -38,11 +38,13 @@ import pygame as pg
 
 
 class GUI:
-    def __init__(self, solver):
+    def __init__(self, gui_spec, solver):
         self.mouse = Mouse()
         self.solver = solver
         self.fluid = solver.fluid
         self.display = solver.display
+
+        self.brush_size = gui_spec["brush_size"]
     
     def __call__(self, events):
         self.mouse.init(events)
@@ -70,9 +72,10 @@ class GUI:
                     # dividing by base_size^2 ensures constant smoke addition 
                     # per unit area
                     self.fluid.d[mouse_index[0], mouse_index[1]] += (
-                        0.1/len(self.mouse.pos_stack)/(self.fluid.base_size**2)
+                        1/len(self.mouse.pos_stack)/(self.fluid.base_size**2)
                     )
 
+                    # TODO: move a constant vol of fluid (base-size independent)
                     # the velocity field is also affected by dragging the mouse
                     self.fluid.u[mouse_index[0], mouse_index[1]] = (
                         delta_pos[0] * self.fluid.dx / self.solver.dt
