@@ -44,11 +44,30 @@ class GUI:
         self.fluid = solver.fluid
         self.display = solver.display
 
+        self.smoke_strength = gui_spec["smoke_strength"]
         self.brush_size = gui_spec["brush_size"]
+        self.origin_brush = None
+        self.set_origin_brush()
     
     def __call__(self, events):
         self.mouse.init(events)
         self.fluid_interaction()
+    
+    def set_origin_brush(self):
+        rad = int(self.brush_size / self.display.sf)
+        linspace = np.arange(-rad, rad) + 0.5
+        X, Y = np.meshgrid(linspace, linspace)
+        in_brush = X*X + Y*Y <= rad**2
+        origin_brush = np.where(in_brush)
+        self.origin_brush = origin_brush[0] - rad, origin_brush[1] - rad
+    
+    def move_brush(self, pos):
+        brush = self.origin_brush[0] + pos[0], self.origin_brush[1] + pos[1]
+        where_in = np.where(
+            (0 <= brush[0]) & (brush[0] < self.fluid.Ny) 
+          & (0 <= brush[1]) & (brush[1] < self.fluid.Nx)
+        )
+        return brush[0][where_in], brush[1][where_in]
 
     def fluid_interaction(self):
         if self.mouse.state == 2:
@@ -67,20 +86,20 @@ class GUI:
                     # TODO: toggle velocity and smoke interaction (ie should be 
                     # able to do one without the other)
                     delta_pos = self.mouse.pos - self.mouse.pos_prev
+                    brush_pos = self.move_brush(mouse_index)
                     # dividing by pos_stack ensures constant smoke addition per 
                     # time step
                     # dividing by base_size^2 ensures constant smoke addition 
                     # per unit area
-                    self.fluid.d[mouse_index[0], mouse_index[1]] += (
-                        1/len(self.mouse.pos_stack)/(self.fluid.base_size**2)
+                    self.fluid.d[brush_pos] += (
+                        self.smoke_strength/len(self.mouse.pos_stack)
+                                           /(self.fluid.base_size**2)
                     )
 
-                    # TODO: move a constant vol of fluid (base-size independent)
-                    # the velocity field is also affected by dragging the mouse
-                    self.fluid.u[mouse_index[0], mouse_index[1]] = (
+                    self.fluid.u[brush_pos] = (
                         delta_pos[0] * self.fluid.dx / self.solver.dt
                     )
-                    self.fluid.v[mouse_index[0], mouse_index[1]] = (
+                    self.fluid.v[brush_pos] = (
                         delta_pos[1] * self.fluid.dy / self.solver.dt
                     )
 
