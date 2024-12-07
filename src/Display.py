@@ -36,6 +36,8 @@ import ctypes
 import numpy as np
 import pygame as pg
 
+from src.VideoWriter import VideoWriter
+
 
 class Display:
     def __init__(self, config, solver):
@@ -64,9 +66,12 @@ class Display:
         self.solver = solver
         self.fluid = solver.fluid
 
+        self.videowriter = VideoWriter(config["videowriter"], self)
+
     def __call__(self):
         self.window.fill(self.background_colour)
         self.update_pxarray()
+        self.videowriter.save_frame()
         self.blit_pxarray()
         pg.display.update()
     
@@ -91,8 +96,8 @@ class Display:
         self.pxarray[..., 1] = self.fluid_colour[1]
         self.pxarray[..., 2] = self.fluid_colour[2]
 
-        # self.draw_smoke()
-        self.draw_vorticity()
+        self.draw_smoke()
+        # self.draw_vorticity()
 
         self.pxarray = np.clip(self.pxarray, 0, 255)
 

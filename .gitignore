@@ -2,3 +2,4 @@ tests
 misc
 out
 *.pyc
+.cache

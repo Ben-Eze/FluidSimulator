@@ -78,6 +78,8 @@ class Fluid:
         # Properties
         self.rho = fluid_spec["density"]
         self.nu = fluid_spec["viscosity"]
+        self.smoke_nu = fluid_spec["smoke_viscosity"]
+        self.smoke_fade = fluid_spec["smoke_fade"]
 
         self.diffuse = None
         self.set_diffusion_solver()
@@ -93,8 +95,8 @@ class Fluid:
     def set_diffusion_solver(self):
         if (self.solver.solver_type == "ImplicitEuler" 
         and self.solver.dx_is_dy):
-            self.diffuse = lambda D: self.solver.diffuseIE_dx_is_dy(
-                D, self.nu, self.dx, self.solver.dt
+            self.diffuse = lambda D, nu=self.nu: self.solver.diffuseIE_dx_is_dy(
+                D, nu, self.dx, self.solver.dt
             )
         
         elif (self.solver.solver_type == "ImplicitEuler" 
@@ -103,8 +105,8 @@ class Fluid:
 
         elif (self.solver.solver_type == "ExplicitEuler" 
         and self.solver.dx_is_dy):
-            self.diffuse = lambda D: self.solver.diffuseEE_dx_is_dy(
-                D, self.where_inner_fluid, self.nu, self.dx, 
+            self.diffuse = lambda D, nu=self.nu: self.solver.diffuseEE_dx_is_dy(
+                D, self.where_inner_fluid, nu, self.dx, 
                 self.solver.dt, self.solver.nit
             )
 
@@ -151,7 +153,12 @@ class Fluid:
         self.u[self.where_fluid] = u_tmp[self.where_fluid]
 
     def diffuse_smoke(self):
-        self.d[self.where_fluid] = self.diffuse(self.d)[self.where_fluid]
+        self.d[self.where_fluid] = self.diffuse(self.d, self.smoke_nu)[self.where_fluid]
     
     def advect_smoke(self):
         self.d[self.where_fluid] = self.advect(self.d)[self.where_fluid]
+    
+    def fade_smoke(self):
+        if self.smoke_fade == 1:
+            return
+        self.d *= self.smoke_fade

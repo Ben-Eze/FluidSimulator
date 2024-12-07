@@ -80,6 +80,7 @@ class Solver:
 
         self.fluid.diffuse_smoke()
         self.fluid.advect_smoke()
+        self.fluid.fade_smoke()
     
     @staticmethod
     def diffuseEE_dx_is_dy(D, fluid_domain, nu, dx, dt, nit):

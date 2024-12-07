@@ -59,3 +59,4 @@ class Mainloop:
 
             self.solver.solve()
             self.display()
+        self.display.videowriter.save_video()
