@@ -50,13 +50,15 @@ class Solver:
         self.dx_is_dy = spec["scheme"]["dx==dy"]
         self.nit = spec["scheme"]["nit"]
         self.dt = spec["time"]["dt"]
+        self.t_max = spec["time"]["t_max"]
+        self.t = 0
         self.fluid = Fluid(spec, self)
         
         self.log = Log(spec["log"])
         
         self.display = Display(spec, self)
         
-        self.gui = GUI(spec["gui"], self)
+        self.gui = GUI(spec, self)
         
         self.mainloop = Mainloop(self)
         
@@ -72,6 +74,9 @@ class Solver:
         self.mainloop()
     
     def solve(self):
+        if self.t > self.t_max:
+            return 1
+        
         self.fluid.diffuse_velocity()
         self.fluid.enforce_continuity()
         self.fluid.advect_velocity()
@@ -81,6 +86,8 @@ class Solver:
         self.fluid.diffuse_smoke()
         self.fluid.advect_smoke()
         self.fluid.fade_smoke()
+        self.t += self.dt
+
     
     @staticmethod
     def diffuseEE_dx_is_dy(D, fluid_domain, nu, dx, dt, nit):

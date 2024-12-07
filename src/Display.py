@@ -41,15 +41,19 @@ from src.VideoWriter import VideoWriter
 
 class Display:
     def __init__(self, config, solver):
-        pg.init()
-        ctypes.windll.user32.SetProcessDPIAware()   # sorts out screen bug
-        
-        w = config["display"]["width"]
-        h = config["display"]["height"]
-        self.dims = np.array([w, h])
+        self.pygame = config["display"]["pygame"]
+        self.show_live = config["display"]["show_live"]
+        if self.pygame:
+            pg.init()
+            ctypes.windll.user32.SetProcessDPIAware()   # sorts out screen bug
+            
+            w = config["display"]["width"]
+            h = config["display"]["height"]
+            self.dims = np.array([w, h])
 
-        self.window = pg.display.set_mode(self.dims, flags=pg.RESIZABLE)
-        # particle_surf = pg.Surface(self.dims, pg.SRCALPHA, 32)    # implement later
+            self.window = pg.display.set_mode(self.dims, flags=pg.RESIZABLE)
+            # particle_surf = pg.Surface(self.dims, pg.SRCALPHA, 32)    # implement later
+            self.update_transformation()
 
         self.Nx = int(config["domain"]["width"] / config["domain"]["base_size"])
         self.Ny = int(config["domain"]["height"] / config["domain"]["base_size"])
@@ -58,7 +62,6 @@ class Display:
         self.sf = None
         self.blit_offset = None
         self.domain_dims = None
-        self.update_transformation()
 
         self.visualisation = config["display"]["visualisation"]
         self.show_smoke = config["display"]["show_smoke"]
@@ -71,11 +74,12 @@ class Display:
         self.videowriter = VideoWriter(config["videowriter"], self)
 
     def __call__(self):
-        self.window.fill(self.background_colour)
         self.update_pxarray()
         self.videowriter.save_frame()
-        self.blit_pxarray()
-        pg.display.update()
+        if self.pygame and self.show_live:
+            self.window.fill(self.background_colour)
+            self.blit_pxarray()
+            pg.display.update()
     
     def update_transformation(self, event=None):
         if event is not None:

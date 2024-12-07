@@ -38,20 +38,25 @@ import pygame as pg
 
 
 class GUI:
-    def __init__(self, gui_spec, solver):
+    def __init__(self, spec, solver):
+        self.exists = spec["display"]["pygame"]
+        if not self.exists:
+            return
+        
         self.mouse = Mouse()
         self.solver = solver
         self.fluid = solver.fluid
         self.display = solver.display
 
-        self.smoke_strength = gui_spec["smoke_strength"]
-        self.brush_size = gui_spec["brush_size"]
+        self.smoke_strength = spec["gui"]["smoke_strength"]
+        self.brush_size = spec["gui"]["brush_size"]
         self.origin_brush = None
         self.set_origin_brush()
     
     def __call__(self, events):
-        self.mouse.init(events)
-        self.fluid_interaction()
+        if self.exists:
+            self.mouse.init(events)
+            self.fluid_interaction()
     
     def set_origin_brush(self):
         rad = int(self.brush_size / self.display.sf)

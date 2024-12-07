@@ -9,7 +9,7 @@ spec = {
 
     "time": {
         "dt": 0.1,
-        "t_max": 0
+        "t_max": 1
     },
 
     "BCs": {                                            # TODO
@@ -35,13 +35,14 @@ spec = {
         "smoke_fade": 0.99
     },
 
-    "display": {                                      # TODO
+    "display": {
+        "pygame": False,
+        "show_live": True,
         "width": 1000,
         "height": 700,
         "visualisation": "",
         "show_smoke": True,
         "show_particles": True,
-        "record": True
     },
 
     "gui": {

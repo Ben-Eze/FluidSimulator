@@ -41,6 +41,9 @@ class Mainloop:
         self.gui = solver.gui
 
     def init(self):
+        if not self.display.pygame:
+            return
+        
         events = pg.event.get()
 
         self.gui(events)
@@ -57,6 +60,8 @@ class Mainloop:
             if self.init():
                 break
 
-            self.solver.solve()
-            self.display()
+            if self.solver.solve():
+                break
+            self.display()   
+
         self.display.videowriter.save_video()
