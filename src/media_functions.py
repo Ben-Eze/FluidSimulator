@@ -36,7 +36,6 @@ def frames2vid(fpath: str,
             return 1
         
         # get image dimensions based off the first file in files
-        # height, width, _ = cv2.imread(os.path.join(fpath, files[0])).shape
         height, width, _ = np.load(f"{fpath}{files[0]}").shape
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         out = cv2.VideoWriter(vpath, fourcc, framerate, (width, height))

@@ -3,8 +3,8 @@ spec = {
 
     "domain": {                                           
         "width": 150,
-        "height": 100,
-        "base_size": 0.5,
+        "height": 40,
+        "base_size": 0.2,
     },
 
     "time": {
@@ -38,7 +38,7 @@ spec = {
     "display": {                                      # TODO
         "width": 1000,
         "height": 700,
-        "visualisation": "velocity",
+        "visualisation": "",
         "show_smoke": True,
         "show_particles": True,
         "record": True
@@ -46,13 +46,14 @@ spec = {
 
     "gui": {
         "brush_size": 20,
-        "smoke_strength": 1
+        "smoke_strength": 2
     },
 
     "videowriter": {
-        "fps": 36,
+        "record": False,
+        "fps": 24,
         "vid_dir": "out/vid",
-        "vid_name": "v"
+        "vid_name": "vid"
     },
 
     "log": {                                          
