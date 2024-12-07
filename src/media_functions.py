@@ -5,6 +5,7 @@ import time
 
 from PIL import Image
 import cv2
+import numpy as np
 
 
 def array2image(pxarray, output_path):
@@ -25,17 +26,18 @@ def frames2vid(fpath: str,
 
         # get list of files if of the form "frame__.png"
         files = [f for f in os.listdir(fpath)
-                 if flabel in f
-                 and "." + fftype in f]
+                 if f.startswith(flabel)
+                 and f.endswith(".npy")]
 
         Nframes = len(files)
 
         if not Nframes:
-            warnings.warn(f"No files {flabel}__.{fftype} found")
+            warnings.warn(f"No files {flabel}__.npy found")
             return 1
         
         # get image dimensions based off the first file in files
-        height, width, _ = cv2.imread(os.path.join(fpath, files[0])).shape
+        # height, width, _ = cv2.imread(os.path.join(fpath, files[0])).shape
+        height, width, _ = np.load(f"{fpath}{files[0]}").shape
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         out = cv2.VideoWriter(vpath, fourcc, framerate, (width, height))
 
@@ -44,7 +46,7 @@ def frames2vid(fpath: str,
 
         for i, file in enumerate(files):
             filename = f"{fpath}{file}"
-            pxarray = cv2.imread(filename)
+            pxarray = np.load(filename)[..., ::-1].astype(np.uint8)
             out.write(pxarray)
             loading_bar(i, Nframes, w_tot=50, t0=t0)
         out.release()

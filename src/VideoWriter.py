@@ -35,6 +35,7 @@
 import os
 import math
 import warnings
+import numpy as np
 
 import src.media_functions as med
 
@@ -50,7 +51,6 @@ class VideoWriter:
         self.max_frames = 21600     # 10 mins 36 fps
         self.zero_padding = math.ceil(math.log10(self.max_frames))
         self.frame_number = 0
-        self.frame_ftype = ".png"
 
         # output video
         self.vid_dir = vw_spec["vid_dir"]
@@ -62,10 +62,11 @@ class VideoWriter:
         if self.frame_number > self.max_frames:
             return
         
-        frame_name = f"f{self.frame_number:0{self.zero_padding}d}{self.frame_ftype}"
+        frame_name = f"f{self.frame_number:0{self.zero_padding}d}.npy"
         self.frame_number += 1
-        med.array2image(self.display.pxarray, 
-                        os.path.join(self.frame_dir, frame_name))
+        np.save(os.path.join(self.frame_dir, frame_name), self.display.pxarray)
+        # med.array2image(self.display.pxarray, 
+        #                 os.path.join(self.frame_dir, frame_name))
     
     def save_video(self):
         os.makedirs(self.vid_dir, exist_ok=True)
