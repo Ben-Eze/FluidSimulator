@@ -42,6 +42,9 @@ import src.media_functions as med
 
 class VideoWriter:
     def __init__(self, vw_spec, display):
+        self.record = vw_spec["record"]
+        if not self.record:
+            return
         self.vw_spec = vw_spec
         self.display = display
 
@@ -59,16 +62,20 @@ class VideoWriter:
         self.fps = vw_spec["fps"]
     
     def save_frame(self):
+        if not self.record:
+            return
+        
         if self.frame_number > self.max_frames:
             return
         
         frame_name = f"f{self.frame_number:0{self.zero_padding}d}.npy"
         self.frame_number += 1
         np.save(os.path.join(self.frame_dir, frame_name), self.display.pxarray)
-        # med.array2image(self.display.pxarray, 
-        #                 os.path.join(self.frame_dir, frame_name))
     
     def save_video(self):
+        if not self.record:
+            return
+        
         os.makedirs(self.vid_dir, exist_ok=True)
 
         # find the lowest suitable name
